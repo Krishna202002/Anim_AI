@@ -2,6 +2,7 @@
 
 AI-powered educational animation generator that creates professional Manim animations from natural language descriptions using a multi-agent pipeline.
 
+
 ## ✨ Features
 
 - 🤖 **Multi-Agent Pipeline**: Teacher → Planner → Coder → Validator → Debugger orchestration
