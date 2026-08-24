@@ -13,6 +13,7 @@ MAX_ATTEMPTS = 3
 MAX_REVISION_TRIES = 3
 
 
+
 def _classify_failure(error_text: str) -> str:
     text = (error_text or "").lower()
     if "syntaxerror" in text and (

@@ -1,6 +1,8 @@
 """
 agent/intent.py
 ───────────────
+
+
 Classifies an incoming user query as one of three tiers:
   - "bare_topic"          → user typed only a topic name (e.g. "RNN", "Gradient Descent")
   - "simple_explanation"  → user typed a SHORT educational request (e.g. "explain gradient descent")

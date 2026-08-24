@@ -11,6 +11,7 @@ PLANNER_MODEL = os.getenv("GEMINI_PLANNER_MODEL", "gemini-2.5-flash")
 # Called BEFORE the planner so the planner gets rich visual guidance.
 # ─────────────────────────────────────────────────────────────────────
 
+
 _WORKING_ADVISOR_PROMPT = """You are an expert educational animation advisor.
 
 A student wants to learn about: "{query}"

@@ -11,6 +11,7 @@ Usage:
     # Returns a dict with visual_style, layout_tips, animation_suggestions, etc.
 """
 
+
 import json
 import os
 from functools import lru_cache

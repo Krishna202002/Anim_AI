@@ -3,6 +3,8 @@ failure_logger.py
 ─────────────────
 Persistent failure logging for AnimAI Studio.
 
+
+
 Every time the Manim sandbox fails, this module:
   1. Writes a timestamped JSON bundle to outputs/failure_logs/<timestamp>_<type>.json
   2. Appends a one-line summary to outputs/failure_logs/index.jsonl for quick grep/scan

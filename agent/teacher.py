@@ -11,6 +11,7 @@ TEACHER_MODEL = os.getenv("GEMINI_TEACHER_MODEL", "gemini-2.5-flash")
 # Produces a strict 7-beat arc with ZERO content overlap between beats.
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 STRUCTURED_TEACHER_PROMPT = """You are a world-class educator. A student wants to learn about: {query}
 
 Your task is to design a 5-beat pedagogical arc for an educational animation.
