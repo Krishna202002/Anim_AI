@@ -58,8 +58,8 @@ User Query
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Manish-Sharma26/AnimAi.git
-   cd AnimAi
+   git clone https://github.com/Krishna202002/Anim_AI
+   cd Anim_Ai
    ```
 
 2. **Create virtual environment**
