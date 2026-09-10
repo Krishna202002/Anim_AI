@@ -88,6 +88,11 @@ def save_video_file(video_path: str, query: str) -> str:
     shutil.copy2(video_path, dest_path)
     return dest_path
 
+# Check if GEMINI_API_KEY is missing and warn user immediately
+if not os.getenv("GEMINI_API_KEY"):
+    st.error("⚠️ **GEMINI_API_KEY is not set in Render Environment Variables!**")
+    st.info("To fix this: Go to Render Dashboard -> Select your Web Service -> **Environment** tab -> Add `GEMINI_API_KEY` with your API key.")
+
 # Show feedback stats if any
 stats = get_feedback_stats()
 if stats["total"] > 0:
@@ -134,12 +139,17 @@ if prompt and st.session_state.get("plan_prompt") and prompt != st.session_state
 
 if plan_btn and prompt:
     st.session_state["video_saved"] = False
-    with st.spinner("🧑🏫 Teacher is explaining the concept, then building your animation plan..."):
-        draft_plan = build_plan(prompt)
-    st.session_state["draft_plan"] = draft_plan
-    st.session_state["approved_plan"] = None
-    st.session_state["plan_prompt"] = prompt
-    st.session_state["generating"] = False
+    try:
+        with st.spinner("🧑‍🏫 Teacher is explaining the concept, then building your animation plan..."):
+            draft_plan = build_plan(prompt)
+        st.session_state["draft_plan"] = draft_plan
+        st.session_state["approved_plan"] = None
+        st.session_state["plan_prompt"] = prompt
+    except Exception as e:
+        st.error(f"❌ Error generating plan: {e}")
+        st.info("💡 Ensure GEMINI_API_KEY is set in Render Environment Variables.")
+    finally:
+        st.session_state["generating"] = False
     st.rerun()
 
 # ── Plan Approval ────────────────────────────────────────────────────────────
@@ -209,11 +219,15 @@ if st.session_state.get("draft_plan"):
         regen_plan_btn = st.button("🔄 Regenerate Plan", use_container_width=True, disabled=is_busy, on_click=_lock_ui)
 
     if regen_plan_btn and prompt:
-        with st.spinner("Regenerating plan from prompt..."):
-            refreshed = build_plan(prompt)
-        st.session_state["draft_plan"] = refreshed
-        st.session_state["approved_plan"] = None
-        st.session_state["generating"] = False
+        try:
+            with st.spinner("Regenerating plan from prompt..."):
+                refreshed = build_plan(prompt)
+            st.session_state["draft_plan"] = refreshed
+            st.session_state["approved_plan"] = None
+        except Exception as e:
+            st.error(f"❌ Error regenerating plan: {e}")
+        finally:
+            st.session_state["generating"] = False
         st.rerun()
 
     if approve_btn:
