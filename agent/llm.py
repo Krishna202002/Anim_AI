@@ -9,12 +9,20 @@ from google.genai import types
 # Load environment variables from .env file
 load_dotenv()
 
-# Get API key from environment variable
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY not found in environment variables. Please create a .env file with your API key.")
+_client = None
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+def _get_client():
+    global _client
+    if _client is not None:
+        return _client
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "GEMINI_API_KEY not found in environment variables. "
+            "Please set GEMINI_API_KEY in your environment or Render Environment Settings."
+        )
+    _client = genai.Client(api_key=api_key)
+    return _client
 
 # Prefer highest quality first, then faster/cheaper fallbacks.
 PREFERRED_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
@@ -39,7 +47,8 @@ def _discover_generate_content_models() -> List[str]:
     """
     discovered: List[str] = []
     try:
-        for model in client.models.list():
+        c = _get_client()
+        for model in c.models.list():
             model_name = _normalize_model_name(getattr(model, "name", ""))
             if not model_name.startswith("gemini"):
                 continue
@@ -207,7 +216,7 @@ def call_llm_detailed(
             if response_schema is not None:
                 config_kwargs["response_schema"] = response_schema
 
-            response = client.models.generate_content(
+            response = _get_client().models.generate_content(
                 model=model_name,
                 contents=prompt,
                 config=types.GenerateContentConfig(**config_kwargs),

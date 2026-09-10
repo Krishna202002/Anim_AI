@@ -158,40 +158,56 @@ def run_manim_sandbox(code: str, timeout: int = 300, query: str = "") -> dict:
         with open(scene_path, "w", encoding="utf-8") as f:
             f.write(code)
 
-        print(f"[Sandbox] Running code in Docker...")
-        print(f"[Sandbox] Using image: {DOCKER_IMAGE}")
+        # Step 3: Determine execution mode (Docker run vs Direct manim inside container)
+        use_direct_manim = (
+            bool(os.getenv("RENDER"))
+            or bool(os.getenv("MANIM_DIRECT"))
+            or os.path.exists("/.dockerenv")
+            or (shutil.which("manim") is not None and shutil.which("docker") is None)
+        )
 
-        # Step 3: Run Docker with pre-built image
-        docker_cmd = [
-            "docker", "run",
-            "--rm",
-            "-v", f"{docker_path}:/sandbox",
-            "--workdir", "/sandbox",
-        ]
+        if use_direct_manim:
+            print(f"[Sandbox] Running code directly via native manim binary...")
+            cmd = [
+                "manim", "render",
+                "--media_dir", os.path.join(tmp_dir, "output"),
+                "--verbosity", "WARNING",
+                "-ql",
+                scene_path,
+            ]
+        else:
+            print(f"[Sandbox] Running code in Docker...")
+            print(f"[Sandbox] Using image: {DOCKER_IMAGE}")
+            cmd = [
+                "docker", "run",
+                "--rm",
+                "-v", f"{docker_path}:/sandbox",
+                "--workdir", "/sandbox",
+            ]
 
-        # Forward host env vars required by AzureService and TTS provider selection.
-        for env_name in (
-            "AZURE_SUBSCRIPTION_KEY",
-            "AZURE_SERVICE_REGION",
-            "TTS_PROVIDER",
-            "TTS_FALLBACK_PROVIDER",
-            "AZURE_TTS_VOICE",
-            "AZURE_TTS_STYLE",
-        ):
-            if os.getenv(env_name):
-                docker_cmd.extend(["-e", env_name])
+            # Forward host env vars required by AzureService and TTS provider selection.
+            for env_name in (
+                "AZURE_SUBSCRIPTION_KEY",
+                "AZURE_SERVICE_REGION",
+                "TTS_PROVIDER",
+                "TTS_FALLBACK_PROVIDER",
+                "AZURE_TTS_VOICE",
+                "AZURE_TTS_STYLE",
+            ):
+                if os.getenv(env_name):
+                    cmd.extend(["-e", env_name])
 
-        docker_cmd.extend([
-            DOCKER_IMAGE,
-            "manim", "render",
-            "--media_dir", "/sandbox/output",
-            "--verbosity", "WARNING",
-            "-ql",
-            "/sandbox/scene.py",
-        ])
+            cmd.extend([
+                DOCKER_IMAGE,
+                "manim", "render",
+                "--media_dir", "/sandbox/output",
+                "--verbosity", "WARNING",
+                "-ql",
+                "/sandbox/scene.py",
+            ])
 
         result = subprocess.run(
-            docker_cmd,
+            cmd,
             capture_output=True,
             text=True,
             encoding='utf-8',

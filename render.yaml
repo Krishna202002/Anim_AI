@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: animai-studio
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: RENDER
+        value: "true"
